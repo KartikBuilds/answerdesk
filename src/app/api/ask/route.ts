@@ -6,7 +6,7 @@ import { visitorId } from "@/lib/visitor";
 
 export const maxDuration = 30;
 
-const MODEL = process.env.GOOGLE_GENERATIVE_AI_API_KEY ? google("gemini-2.5-flash") : "openai/gpt-4o-mini";
+const MODEL = process.env.GOOGLE_GENERATIVE_AI_API_KEY ? google("gemini-flash-lite-latest") : "openai/gpt-4o-mini";
 
 const json = (body: unknown, status = 200) => Response.json(body, { status });
 
