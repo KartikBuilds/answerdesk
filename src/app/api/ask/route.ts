@@ -41,8 +41,38 @@ export async function POST(request: Request) {
     prompt: buildPrompt(question, sources),
     maxOutputTokens: 350,
     temperature: 0.2,
-    onError: ({ error: e }) => console.error("answer generation failed", e),
   });
   const meta = sources.map(({ slug, title, heading }) => ({ slug, title, heading }));
-  return result.toTextStreamResponse({ headers: { "x-sources": encodeURIComponent(JSON.stringify(meta)) } });
+
+  // Wait for the first piece of text, so a model failure becomes a clean fallback instead of an empty answer.
+  const parts = result.fullStream[Symbol.asyncIterator]();
+  let first = "";
+  try {
+    for (;;) {
+      const { value, done } = await parts.next();
+      if (done) break;
+      if (value.type === "error") throw value.error;
+      if (value.type === "text-delta") { first = value.text; break; }
+    }
+  } catch (e) {
+    console.error("answer generation failed", e);
+    return json({ answer: "", sources: meta, error: "The assistant can't answer right now. These articles look relevant:", detail: String(e).slice(0, 300) }, 503);
+  }
+
+  const encoder = new TextEncoder();
+  const body = new ReadableStream<Uint8Array>({
+    start(controller) { if (first) controller.enqueue(encoder.encode(first)); },
+    async pull(controller) {
+      try {
+        const { value, done } = await parts.next();
+        if (done) return controller.close();
+        if (value.type === "text-delta") controller.enqueue(encoder.encode(value.text));
+        if (value.type === "error") throw value.error;
+      } catch (e) {
+        console.error("answer stream failed", e);
+        controller.close();
+      }
+    },
+  });
+  return new Response(body, { headers: { "content-type": "text/plain; charset=utf-8", "x-sources": encodeURIComponent(JSON.stringify(meta)) } });
 }

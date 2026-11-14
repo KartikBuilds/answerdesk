@@ -45,7 +45,8 @@ export function AskBox() {
       const res = await fetch("/api/ask", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ question }) });
       if (res.headers.get("content-type")?.includes("application/json")) {
         const body = await res.json();
-        setState(body.error ? { kind: "error", question, message: body.error } : { kind: "answer", question, text: body.answer, sources: [], done: true });
+        const related = (body.sources ?? []).map((s: Source) => `\n• ${s.title}: ${s.heading}`).join("");
+        setState(body.error ? { kind: "error", question, message: body.error + related } : { kind: "answer", question, text: body.answer, sources: [], done: true });
         return;
       }
       const sources: Source[] = JSON.parse(decodeURIComponent(res.headers.get("x-sources") ?? "%5B%5D"));
