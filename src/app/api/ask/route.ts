@@ -20,7 +20,13 @@ export async function POST(request: Request) {
   if (quotaError) return json({ error: "The assistant is unavailable right now. Browse the articles below instead." }, 503);
   if (!allowed) return json({ error: "You've reached today's question limit for this demo. Try again tomorrow, or browse the articles below." }, 429);
 
-  const [vector] = await embed([question]);
+  let vector: number[];
+  try {
+    [vector] = await embed([question]);
+  } catch (e) {
+    console.error("embedding failed", e);
+    return json({ error: "Search is unavailable right now. Browse the articles below instead.", code: "embed_failed", detail: String(e).slice(0, 300) }, 503);
+  }
   const { data, error } = await supabase.rpc("ad_match", { p_embedding: `[${vector.join(",")}]`, p_count: 6 });
   if (error) return json({ error: "Search is unavailable right now. Browse the articles below instead." }, 503);
 
