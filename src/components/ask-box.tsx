@@ -46,7 +46,7 @@ export function AskBox() {
       if (res.headers.get("content-type")?.includes("application/json")) {
         const body = await res.json();
         const related = (body.sources ?? []).map((s: Source) => `\n• ${s.title}: ${s.heading}`).join("");
-        setState(body.error ? { kind: "error", question, message: body.error + related } : { kind: "answer", question, text: body.answer, sources: [], done: true });
+        setState(body.error ? { kind: "error", question, message: body.error + related } : { kind: "answer", question, text: body.answer, sources: body.sources ?? [], done: true });
         return;
       }
       const sources: Source[] = JSON.parse(decodeURIComponent(res.headers.get("x-sources") ?? "%5B%5D"));

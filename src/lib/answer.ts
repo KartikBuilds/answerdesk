@@ -35,3 +35,13 @@ export function buildPrompt(question: string, sources: Match[]): string {
 
 export const NOT_FOUND =
   "I couldn't find that in the Ledgerly help center. Try rephrasing, or contact support and a person will help.";
+
+/**
+ * Answer without a language model: quote the best-matching section and cite it.
+ * Used whenever the model is unavailable, so the assistant still gives a sourced answer.
+ */
+export function extractiveAnswer(sources: Match[]): string {
+  const best = sources[0];
+  const body = best.content.split("\n").slice(1).join(" ").trim();
+  return `From "${best.title}" (${best.heading}): ${body} [1]`;
+}

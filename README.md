@@ -5,7 +5,7 @@ citations linking to the exact section. Questions the articles don't cover get a
 
 A **personal portfolio project** by Kartik Shinde. "Ledgerly" and its help articles are fictional, written for this demo.
 
-**Live demo:** https://answerdesk-kartikbuilds.vercel.app
+**Live demo:** https://answerdesk-one.vercel.app
 
 ![Help center home](docs/home.png)
 
@@ -18,7 +18,8 @@ A **personal portfolio project** by Kartik Shinde. "Ledgerly" and its help artic
    only from them and cite `[1]`, `[2]`. The answer streams in; citations become links to the article section.
 4. **Cost and abuse limits in the database.** Each visitor gets 15 questions a day and the whole site 300, enforced by a Postgres function with
    row locking so concurrent requests can't overshoot. Visitors are identified by a daily-rotating hash, never a stored IP address.
-5. **Graceful failure.** If the model is unavailable, the user still sees the most relevant articles.
+5. **Works with or without a model.** If the language model is unavailable or not enabled, the assistant quotes the best-matching
+   section with its citation instead of failing. The public demo runs in this no-cost mode; enabling the AI Gateway switches it to generated answers with no code change.
 
 | Concern | Where |
 | --- | --- |

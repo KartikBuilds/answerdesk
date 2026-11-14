@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MIN_SIMILARITY, buildPrompt, isAnswerable, questionSchema, selectSources, type Match } from "@/lib/answer";
+import { MIN_SIMILARITY, buildPrompt, extractiveAnswer, isAnswerable, questionSchema, selectSources, type Match } from "@/lib/answer";
 
 const m = (slug: string, heading: string, similarity: number): Match => ({ slug, title: slug, heading, content: `${slug} ${heading}`, similarity });
 
@@ -36,5 +36,12 @@ describe("visitorId", () => {
   it("is stable within a day and changes the next day", () => {
     expect(visitorId(h("203.0.113.9"), day)).toBe(visitorId(h("203.0.113.9"), new Date("2030-01-01T23:00:00Z")));
     expect(visitorId(h("203.0.113.9"), day)).not.toBe(visitorId(h("203.0.113.9"), new Date("2030-01-02T10:00:00Z")));
+  });
+});
+
+describe("extractiveAnswer", () => {
+  it("quotes the best section and cites it", () => {
+    const best = { slug: "plans", title: "Plans and pricing", heading: "Pro plan", content: "Plans and pricing — Pro plan\nPro costs 12 USD per month.", similarity: 0.8 };
+    expect(extractiveAnswer([best])).toBe('From "Plans and pricing" (Pro plan): Pro costs 12 USD per month. [1]');
   });
 });

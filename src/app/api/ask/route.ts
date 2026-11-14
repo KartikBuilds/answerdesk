@@ -1,5 +1,5 @@
 import { streamText } from "ai";
-import { NOT_FOUND, SYSTEM_PROMPT, buildPrompt, isAnswerable, questionSchema, selectSources, type Match } from "@/lib/answer";
+import { NOT_FOUND, SYSTEM_PROMPT, buildPrompt, extractiveAnswer, isAnswerable, questionSchema, selectSources, type Match } from "@/lib/answer";
 import { db } from "@/lib/db";
 import { visitorId } from "@/lib/visitor";
 
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     [vector] = await embed([question]);
   } catch (e) {
     console.error("embedding failed", e);
-    return json({ error: "Search is unavailable right now. Browse the articles below instead.", code: "embed_failed", detail: String(e).slice(0, 300) }, 503);
+    return json({ error: "Search is unavailable right now. Browse the articles below instead."}, 503);
   }
   const { data, error } = await supabase.rpc("ad_match", { p_embedding: `[${vector.join(",")}]`, p_count: 6 });
   if (error) return json({ error: "Search is unavailable right now. Browse the articles below instead." }, 503);
@@ -56,7 +56,8 @@ export async function POST(request: Request) {
     }
   } catch (e) {
     console.error("answer generation failed", e);
-    return json({ answer: "", sources: meta, error: "The assistant can't answer right now. These articles look relevant:", detail: String(e).slice(0, 300) }, 503);
+    // Model unavailable (for example, no credit): answer from the best passage instead.
+    return json({ answer: extractiveAnswer(sources), sources: meta, mode: "quote" });
   }
 
   const encoder = new TextEncoder();
