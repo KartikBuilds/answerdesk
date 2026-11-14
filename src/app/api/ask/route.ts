@@ -1,7 +1,6 @@
 import { streamText } from "ai";
 import { NOT_FOUND, SYSTEM_PROMPT, buildPrompt, isAnswerable, questionSchema, selectSources, type Match } from "@/lib/answer";
 import { db } from "@/lib/db";
-import { embed } from "@/lib/embed";
 import { visitorId } from "@/lib/visitor";
 
 export const maxDuration = 30;
@@ -22,6 +21,8 @@ export async function POST(request: Request) {
 
   let vector: number[];
   try {
+    // Loaded on demand so a model problem degrades to a clear message instead of a crashed route.
+    const { embed } = await import("@/lib/embed");
     [vector] = await embed([question]);
   } catch (e) {
     console.error("embedding failed", e);
