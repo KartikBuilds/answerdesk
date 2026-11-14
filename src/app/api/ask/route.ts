@@ -1,11 +1,12 @@
 import { streamText } from "ai";
+import { google } from "@ai-sdk/google";
 import { NOT_FOUND, SYSTEM_PROMPT, buildPrompt, extractiveAnswer, isAnswerable, questionSchema, selectSources, type Match } from "@/lib/answer";
 import { db } from "@/lib/db";
 import { visitorId } from "@/lib/visitor";
 
 export const maxDuration = 30;
 
-const MODEL = "google/gemini-2.5-flash-lite";
+const MODEL = process.env.GOOGLE_GENERATIVE_AI_API_KEY ? google("gemini-2.5-flash") : "openai/gpt-4o-mini";
 
 const json = (body: unknown, status = 200) => Response.json(body, { status });
 
