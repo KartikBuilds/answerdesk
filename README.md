@@ -5,7 +5,7 @@ citations linking to the exact section. Questions the articles don't cover get a
 
 A **personal portfolio project** by Kartik Shinde. "Ledgerly" and its help articles are fictional, written for this demo.
 
-**Live demo:** https://answerdesk-one.vercel.app
+**Live demo:** https://answerdesk-kartik.vercel.app
 
 ![Help center home](docs/home.png)
 
